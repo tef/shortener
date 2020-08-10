@@ -4,6 +4,8 @@ import hashlib
 
 from contextlib import contextmanager
 
+import testhelper
+
 def create_url_key(long_url, length=8):
     """
         notes: shake-256 provides variable length digests
@@ -74,14 +76,9 @@ class Store:
             c.execute('delete from short_urls where short_url = ?', [short_url])
             return c.rowcount() > 0
 
-TESTS = []
-def Test():
-    def _decorator(fn):
-        TESTS.append(fn)
-        return fn
-    return _decorator
+TESTS = testhelper.TestRunner()
 
-@Test()
+@TESTS.add()
 def test_url_store():
     store = Store(":memory:")
     store.create_tables()
@@ -95,19 +92,4 @@ def test_url_store():
     assert out_url == long_url
 
 if __name__ == '__main__':
-    count, success, fail, error = 0,0,0,0
-    for test in TESTS:
-        count +=1
-        try:
-            test()
-            success +=1
-        except AssertionError as e:
-            fail +=1
-            print("Failed Assertion: {} in test {}".format(e, test.__name__), file=sys.stderr)
-        except Exception as e:
-            error +=1
-            print("Error: {} in test {}".format(e, test.__name__), file=sys.stderr)
-    if count == success:
-        print("ran {} tests, {} passed".format(count, success))
-    else:
-        print("ran {} tests, {} passed, {} failed, {} errors".format(count, success, fail, error))
+    TESTS.run()

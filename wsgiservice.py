@@ -10,8 +10,9 @@ import urllib
 import urllib.request
 
 from urllib.parse import urljoin, urlencode, parse_qs
-from contextlib import contextmanager
 from wsgiref.simple_server import make_server, WSGIRequestHandler
+
+import testhelper
 
 class WSGIServer(threading.Thread):
     class QuietWSGIRequestHandler(WSGIRequestHandler):
@@ -105,12 +106,7 @@ def POST(url, data):
        return response.read().decode('utf-8')
 
 
-TESTS = []
-def Test():
-    def _decorator(fn):
-        TESTS.append(fn)
-        return fn
-    return _decorator
+TESTS = testhelper.TestRunner()
 
 class TestWsgiService(WSGIService):
     def __init__(self, message):
@@ -118,7 +114,7 @@ class TestWsgiService(WSGIService):
     def on_request(self, method, path, query, data, headers):
         return "text/plain", self.message
 
-@Test()
+@TESTS.add()
 def test_service():
     message = "test message"
     service = WSGIServer(TestWsgiService(message))
@@ -129,19 +125,4 @@ def test_service():
     service.stop()
 
 if __name__ == '__main__':
-    count, success, fail, error = 0,0,0,0
-    for test in TESTS:
-        count +=1
-        try:
-            test()
-            success +=1
-        except AssertionError as e:
-            fail +=1
-            print("Failed Assertion: {} in test {}".format(e, test.__name__), file=sys.stderr)
-        except Exception as e:
-            error +=1
-            print("Error: {} in test {}".format(e, test.__name__), file=sys.stderr)
-    if count == success:
-        print("ran {} tests, {} passed".format(count, success))
-    else:
-        print("ran {} tests, {} passed, {} failed, {} errors".format(count, success, fail, error))
+    TESTS.run()
