@@ -15,6 +15,7 @@ class HTTPRequest:
         self.path = None
         self.headers = {}
         self.body = bytearray()
+        self.content_type = ""
 
     def parse(self, buf):
         for c in buf:
@@ -36,8 +37,10 @@ class HTTPRequest:
                             k, v = line.split(':', 1)
                             self.headers[k.lower().strip()] = v.strip()
                     self.state = "body"
+                    self.raw_body_length = int(self.headers.get('content-length', 0))
             elif self.state == "body":
                 self.raw_body.append(c)
+                self.raw_body_length -=1
         if self.state == "body" and self.raw_body_length <= 0:
             self.state = "end"
 
@@ -60,6 +63,7 @@ def create_server(app):
                     'REQUEST_METHOD': self.req.method,
                     'PATH_INFO': self.req.path,
                     'CONTENT_LENGTH': len(self.req.raw_body),
+                    'CONTENT_TYPE': self.req.headers.get('content-type'),
                     'wsgi.input': io.BytesIO(self.req.raw_body),
                 }
                 _status = "200 OK"
@@ -74,7 +78,7 @@ def create_server(app):
                 body = app(environ, start_response)
                 body = b"".join(body)
 
-                if 'content-type' not in _headers or 'Content-Type' not in _headers:
+                if 'content-type' not in _headers and 'Content-Type' not in _headers:
                     _headers['Content-Type'] = "text/plain"
                 _headers['Content-Length'] = str(len(body))
                 _headers['Connection'] = 'Close'

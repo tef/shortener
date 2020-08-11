@@ -81,7 +81,7 @@ class WSGIService:
             if response is not None:
                 content_type, data = response
                 status = "200 OK"
-                response_headers = [("content-type", content_type)]
+                response_headers = [("Content-Type", content_type)]
                 start_response(status, response_headers)
                 return [data.encode('utf-8')]
             else:
