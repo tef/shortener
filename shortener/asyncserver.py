@@ -2,8 +2,7 @@ import asyncio
 import io
 import sys
 
-def app(environ,start_response):
-    return ["Hello\n"]
+from . import testhelper
 
 class HTTPRequest:
     def __init__(self):
@@ -94,14 +93,13 @@ async def run_server(app, host, port):
     server = await loop.create_server(create_server(app), host, port)
     await server.serve_forever()
 
-if __name__ == '__main__':
-    host = "0.0.0.0"
-    port = 1729
-    if sys.argv[1:]:
-        arg = sys.argv[1].split(":")
-        host = arg[0]
-        if len(arg) > 1:
-            port = arg[1]
+TESTS = testhelper.TestRunner()
 
-    print("http://{}:{}".format(host, port))
-    asyncio.run(run_server(app, host, port))
+@TESTS.add()
+def parser_test():
+    req = HTTPRequest()
+    req.parse(b'GET / HTTP/1.1\r\nHost: 127.1:1729\r\nUser-Agent: curl/7.51.0\r\nAccept: */*\r\n\r\n')
+    assert req.complete()
+
+if __name__ == '__main__':
+    TESTS.run()

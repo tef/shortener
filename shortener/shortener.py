@@ -1,14 +1,14 @@
 from urllib.parse import parse_qs
 
-import database
-import wsgiservice
-import testhelper
+from . import database
+from . import wsgiservice
+from . import testhelper
 
 class ShortenerService(wsgiservice.WSGIService):
     def __init__(self, store):
         self.store = store
 
-    def on_request(self, method, path, query, data, headers):
+    def on_request(self, method, path, query, content_type, data, headers):
         if method == "GET":
             if path.startswith("/u/"):
                 short_key = path[3:]

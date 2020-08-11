@@ -12,7 +12,7 @@ import urllib.request
 from urllib.parse import urljoin, urlencode, parse_qs
 from wsgiref.simple_server import make_server, WSGIRequestHandler
 
-import testhelper
+from . import testhelper
 
 class Response(Exception):
     def __init__(self, status, headers, body):
@@ -76,7 +76,7 @@ class WSGIService:
             else:
                 data = None
 
-            response = self.on_request(method, path, parameters, data, headers)
+            response = self.on_request(method, path, parameters, content_type, data, headers)
 
             if response is not None:
                 content_type, data = response
@@ -103,7 +103,7 @@ class WSGIService:
             traceback.print_exc()
             return [traceback.format_exc().encode('utf8')]
 
-    def on_request(self, method, path, query, data, headers):
+    def on_request(self, method, path, query, content_type, data, headers):
         return None
 
     def raise_redirect(self, url):
@@ -128,7 +128,7 @@ TESTS = testhelper.TestRunner()
 class TestWsgiService(WSGIService):
     def __init__(self, message):
         self.message = message
-    def on_request(self, method, path, query, data, headers):
+    def on_request(self, method, path, query, content_type, data, headers):
         return "text/plain", self.message
 
 @TESTS.add()

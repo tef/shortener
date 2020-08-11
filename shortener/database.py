@@ -4,7 +4,7 @@ import hashlib
 
 from contextlib import contextmanager
 
-import testhelper
+from . import testhelper
 
 def create_url_key(long_url, length=8):
     """
