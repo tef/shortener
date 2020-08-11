@@ -1,4 +1,4 @@
-""" asyncio based http server for wsgi apps, very rudimentary."
+""" asyncio based http server for wsgi apps, very rudimentary."""
 import asyncio
 import io
 import sys
