@@ -1,0 +1,19 @@
+# URL Shortening Service Example
+
+Tested on Python 3.7
+
+## Running Tests
+
+Run `./run_tests.sh` in the top level directory
+
+## Running Service
+
+Run `python3 run_service.py`, then open `http://127.0.0.1:1729/` in your browser
+
+## Overview of `shortener` module
+
+- `database.py` sqlite3 storage backend
+- `testrunner.py` simple test runner
+- `wsgiutil.py` wsgi service boilerplate
+- `asyncserver.py` asyncio http service
+- `service.py` wsgi app for url shortening
