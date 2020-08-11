@@ -2,7 +2,7 @@ import asyncio
 import io
 import sys
 
-from . import testhelper
+from . import testrunner
 
 class HTTPRequest:
     def __init__(self):
@@ -93,7 +93,7 @@ async def run_server(app, host, port):
     server = await loop.create_server(create_server(app), host, port)
     await server.serve_forever()
 
-TESTS = testhelper.TestRunner()
+TESTS = testrunner.TestRunner()
 
 @TESTS.add()
 def parser_test():

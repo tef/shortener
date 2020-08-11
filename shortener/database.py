@@ -4,7 +4,7 @@ import hashlib
 
 from contextlib import contextmanager
 
-from . import testhelper
+from . import testrunner
 
 def create_url_key(long_url, length=8):
     """
@@ -81,7 +81,7 @@ class TempStore(Store):
     def __init__(self):
         Store.__init__(self, ":memory:")
 
-TESTS = testhelper.TestRunner()
+TESTS = testrunner.TestRunner()
 
 @TESTS.add()
 def test_url_store():

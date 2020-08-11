@@ -12,7 +12,7 @@ import urllib.request
 from urllib.parse import urljoin, urlencode, parse_qs
 from wsgiref.simple_server import make_server, WSGIRequestHandler
 
-from . import testhelper
+from . import testrunner
 
 class Response(Exception):
     def __init__(self, status, headers, body):
@@ -123,7 +123,7 @@ def POST(url, data):
        return response.read().decode('utf-8')
 
 
-TESTS = testhelper.TestRunner()
+TESTS = testrunner.TestRunner()
 
 class TestWsgiService(WSGIService):
     def __init__(self, message):
