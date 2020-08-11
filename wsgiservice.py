@@ -14,6 +14,12 @@ from wsgiref.simple_server import make_server, WSGIRequestHandler
 
 import testhelper
 
+class Response(Exception):
+    def __init__(self, status, headers, body):
+        self.status = status
+        self.headers = headers
+        self.body = body
+
 class WSGIServer(threading.Thread):
     class QuietWSGIRequestHandler(WSGIRequestHandler):
         def log_request(self, code='-', size='-'):
@@ -61,6 +67,8 @@ class WSGIService:
 
             headers = {name[5:].lower():value for name, value in environ.items() if name.startswith('HTTP_')}
 
+            path = "/{}".format(path) if not path.startswith("/") else path
+
             if content_length:
                 data = environ['wsgi.input'].read(int(content_length))
                 if not data:
@@ -84,6 +92,9 @@ class WSGIService:
 
         except (StopIteration, GeneratorExit, SystemExit, KeyboardInterrupt):
             raise
+        except Response as e:
+            start_response(e.status, e.headers)
+            return e.body
         except Exception as e:
             status = "500 bad"
             response_headers = [("content-type", "text/plain")]
@@ -94,6 +105,12 @@ class WSGIService:
 
     def on_request(self, method, path, query, data, headers):
         return None
+
+    def raise_redirect(self, url):
+        raise Response("303 Found", [("location", url)], [])
+
+    def raise_notfound(self):
+        raise Response("404 Not Found", [], [])
 
 def GET(url):
    req = urllib.request.Request(url)

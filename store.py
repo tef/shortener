@@ -76,6 +76,17 @@ class Store:
             c.execute('delete from short_urls where short_url = ?', [short_url])
             return c.rowcount() > 0
 
+class TempStore(Store):
+    def __init__(self):
+        Store.__init__(self, ":memory:")
+
+    @property
+    def db(self):
+        if self._db is None:
+            self._db = sqlite3.connect(self.filename)
+            self.create_tables()
+        return self._db
+
 TESTS = testhelper.TestRunner()
 
 @TESTS.add()
