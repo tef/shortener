@@ -1,6 +1,4 @@
-"""
-   Boilerplate code for starting a WSGI Server
-"""
+""" Boilerplate code for starting a WSGI Server, and a skeleton for a wsgi app handler"""
 
 import threading
 import socket
@@ -122,7 +120,6 @@ def POST(url, data):
    with urllib.request.urlopen(req) as response:
        return response.read().decode('utf-8')
 
-
 TESTS = testrunner.TestRunner()
 
 class TestWsgiService(WSGIService):
@@ -137,7 +134,6 @@ def test_service():
     service = WSGIServer(TestWsgiService(message))
     service.start()
     response = GET(service.url)
-    print(message, response)
     assert message == response
     service.stop()
 

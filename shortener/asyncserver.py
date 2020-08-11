@@ -1,3 +1,4 @@
+""" asyncio based http server for wsgi apps, very rudimentary."
 import asyncio
 import io
 import sys
@@ -5,6 +6,7 @@ import sys
 from . import testrunner
 
 class HTTPRequest:
+    """For Parsing an incoming http request"""
     def __init__(self):
         self.state = "first"
         self.raw_first = bytearray()
@@ -48,12 +50,10 @@ class HTTPRequest:
         return self.state == "end"
 
 
-
 def create_server(app):
     class WSGIServer(asyncio.Protocol):
         def __init__(self):
             self.req = HTTPRequest()
-
         def connection_made(self, transport):
             self.transport = transport
         def data_received(self, data):

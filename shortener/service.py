@@ -1,17 +1,18 @@
+""" wsgi app for url shortener service """
+
 import html
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlencode
 
 from . import database
 from . import wsgiutil
 from . import testrunner
+from . import metrics
 
 HOMEPAGE = """
-<HTML>
-<head><title>url shortener example</title></head>
+<html><head><title>url shortener example</title></head>
 <body>
-<FORM ACTION="/shorten" METHOD="POST">
-Long URL: <input name="url"> 
-<input type="submit" value="Shorten!">
+<form action="/shorten" method="POST">
+Long URL: <input name="url"> <input type="submit" value="Shorten!">
 </form>
 </body>
 </html>
@@ -36,6 +37,7 @@ class ShortenerService(wsgiutil.WSGIService):
                 short_key = path[3:]
                 url = self.store.get_long_url(short_key)
                 if url:
+                    metrics.log_redirect(short_key)
                     self.raise_redirect(url)
                 else:
                     self.raise_notfound()
@@ -45,7 +47,6 @@ class ShortenerService(wsgiutil.WSGIService):
             self.raise_notfound()
         elif method == "POST":
             if path == "/shorten":
-                print(content_type)
                 if content_type == "application/x-www-form-urlencoded":
                     data = data.decode('utf-8')
                     data = parse_qs(data)
@@ -53,6 +54,7 @@ class ShortenerService(wsgiutil.WSGIService):
                 else:
                     raise Exception('bad data')
                 short_key = self.store.create_short_url(long_url)
+                metrics.log_creation(short_key, long_url)
                 return "text/html", SHORTENED("/u/{}".format(short_key))
 
         self.raise_notfound()
@@ -68,10 +70,11 @@ def test_service():
 
     long_url = "http://a-long-url/"
 
+    args = urlencode({'url': long_url}).encode('utf-8')
+    response = wsgiutil.POST("{}shorten".format(service.url), args)
+
     short_key = database.create_url_key(long_url)
-    response = wsgiutil.POST("{}shorten".format(service.url), long_url.encode("utf-8"))
-    print(response)
-    assert response == "/u/{}".format(short_key)
+    assert "/u/{}".format(short_key) in response
     service.stop()
 
 if __name__ == '__main__':

@@ -1,7 +1,8 @@
+""" storage for url shortener, and short-url generation """
+
 import sys
 import sqlite3
 import hashlib
-
 from contextlib import contextmanager
 
 from . import testrunner

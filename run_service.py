@@ -1,10 +1,11 @@
+#!/usr/bin/env python3 
 import sys
 import asyncio
 
 from shortener import database, wsgiutil, service, asyncserver
 
 if __name__ == '__main__':
-    host = "0.0.0.0"
+    host = "127.0.0.1"
     port = 1729
     if sys.argv[1:]:
         arg = sys.argv[1].split(":")
@@ -12,9 +13,15 @@ if __name__ == '__main__':
         if len(arg) > 1:
             port = arg[1]
 
-    db_file = "shortener.db"
+    if sys.argv[2:]:
+        db_file = sys.argv[2]
+    else:
+        db_file = "shortener.db"
     storage = database.Store(db_file)
     app = service.ShortenerService(storage)
 
-    print("http://{}:{}".format(host, port))
-    asyncio.run(asyncserver.run_server(app, host, port))
+    print("STARTED: Database '{}', http://{}:{}/ ".format(db_file, host, port))
+    try:
+        asyncio.run(asyncserver.run_server(app, host, port))
+    except KeyboardInterrupt:
+        print("\rEXITING")
