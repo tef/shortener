@@ -107,7 +107,7 @@ class WSGIService:
         return None
 
     def raise_redirect(self, url):
-        raise Response("303 Found", [("location", url)], [])
+        raise Response("303 Found", [("Location", url)], [])
 
     def raise_notfound(self):
         raise Response("404 Not Found", [], [])

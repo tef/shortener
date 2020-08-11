@@ -1,6 +1,6 @@
 from urllib.parse import parse_qs
 
-import store
+import database
 import wsgiservice
 import testhelper
 
@@ -12,7 +12,7 @@ class ShortenerService(wsgiservice.WSGIService):
         if method == "GET":
             if path.startswith("/u/"):
                 short_key = path[3:]
-                url = store.get_long_url(short_key)
+                url = self.store.get_long_url(short_key)
                 if url:
                     self.raise_redirect(url)
                 else:
@@ -31,13 +31,13 @@ TESTS = testhelper.TestRunner()
 
 @TESTS.add()
 def test_service():
-    urlstore = store.TempStore()
+    urlstore = database.TempStore()
     service = wsgiservice.WSGIServer(ShortenerService(urlstore))
     service.start()
 
     long_url = "http://a-long-url/"
 
-    short_key = store.create_url_key(long_url)
+    short_key = database.create_url_key(long_url)
     response = wsgiservice.POST("{}shorten".format(service.url), long_url.encode("utf-8"))
     print(response)
     assert response == "/u/{}".format(short_key)

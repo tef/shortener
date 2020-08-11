@@ -24,6 +24,7 @@ class Store:
     def db(self):
         if self._db is None:
             self._db = sqlite3.connect(self.filename)
+            self.create_tables()
         return self._db
 
     @contextmanager
@@ -80,18 +81,11 @@ class TempStore(Store):
     def __init__(self):
         Store.__init__(self, ":memory:")
 
-    @property
-    def db(self):
-        if self._db is None:
-            self._db = sqlite3.connect(self.filename)
-            self.create_tables()
-        return self._db
-
 TESTS = testhelper.TestRunner()
 
 @TESTS.add()
 def test_url_store():
-    store = Store(":memory:")
+    store = TempStore()
     store.create_tables()
 
     long_url = "a long url"
